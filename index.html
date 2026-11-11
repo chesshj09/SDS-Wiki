@@ -178,6 +178,8 @@ const NPC={};G.npcs.forEach(n=>NPC[n.key]=n);
 const PIN=['Sariel','Lane','Rane','Hovsep','Pelette','Lucas','Moore','Uriel']; // 앞에 둘 주요 주민 (순서 고정)
 const pinIdx=k=>{const i=PIN.indexOf(k);return i<0?999:i};
 const NPCS=[...G.npcs].sort((a,b)=>pinIdx(a.key)-pinIdx(b.key)||a.ko.localeCompare(b.ko,'ko'));
+const FAM={Lane:'Rane',Rane:'Lane'};          // 가족 관계
+const YEAR2=['Lane','Rane'];                    // 1년차 결혼 불가, 2년차부터 가능
 const josa=(w,a,b)=>{const c=w.charCodeAt(w.length-1);return c>=0xAC00&&c<=0xD7A3?((c-0xAC00)%28?a:b):b};
 
 /* ---------- 이미지 (초상화 / 스프라이트) ---------- */
@@ -270,7 +272,7 @@ function infobox(n){
  <div class="pslot"><span class="ph">초상화 자리<br>(정사각형 PNG)</span><img src="${esc(imgSrc('portrait',k))}" data-k="portrait" alt="${esc(n.ko)} 초상화" onload="spr(this)" onerror="this.remove()"></div>
  ${st.edit?`<div class="ebtns"><button class="btn" data-up="portrait">초상화 올리기</button></div>`:''}
  <div class="sprow"><span class="sprbox"><b class="ph">없음</b><img class="px" src="${esc(imgSrc('sprite',k))}" data-k="sprite" alt="${esc(n.ko)} 스프라이트" onload="spr(this)" onerror="this.remove()"></span><span class="cap">스프라이트${st.edit?`<br><button class="btn" data-up="sprite" style="margin-top:4px">올리기</button>`:''}</span></div>
- <table>${row('이름',esc(n.ko))}${row('영문 ID',`<span class="mono">${esc(k)}</span>`)}${row('생일',`${SEA[s]} ${d}일`)}${row('연애',n.romance?'가능':'불가')}${row('이벤트',`${(n.events||[]).length}개`)}${n.bevents&&n.bevents.length?row('생일 이벤트',`${n.bevents.length}개`):''}${n.dlc&&n.dlc.length?row('DLC 이벤트',`${n.dlc.length}개`):''}</table></aside>`;
+ <table>${row('이름',esc(n.ko))}${row('영문 ID',`<span class="mono">${esc(k)}</span>`)}${row('생일',`${SEA[s]} ${d}일`)}${FAM[k]?row('가족',`<a href="#/npc/${FAM[k]}">${esc(NPC[FAM[k]].ko)}</a>`):''}${row('결혼',YEAR2.includes(k)?'1년차 불가능<br>2년차 가능':n.romance?'가능':'불가능')}${row('이벤트',`${(n.events||[]).length}개`)}${n.bevents&&n.bevents.length?row('생일 이벤트',`${n.bevents.length}개`):''}${n.dlc&&n.dlc.length?row('DLC 이벤트',`${n.dlc.length}개`):''}</table></aside>`;
 }
 function npcPage(n){
  const k=n.key,[s,d]=n.bday,secs=[];
@@ -300,7 +302,7 @@ function npcPage(n){
   }else b+=sec(x.t||'(제목 없음)',wk(x.b||''));
  });
  if(st.edit)b+=`<p><button class="btn" data-addsec="1">＋ 섹션 추가</button></p>`;
- const lead=`<p><b>${esc(n.ko)}</b>${josa(n.ko,'은','는')} Seven Deadly Sins(SDS) 모드의 주민이다. 생일은 ${SEA[s]} ${d}일이고${n.romance?', 연애할 수 있다':', 연애 대상은 아니다'}.</p>`;
+ const lead=`<p><b>${esc(n.ko)}</b>${josa(n.ko,'은','는')} Seven Deadly Sins(SDS) 모드의 주민이다. 생일은 ${SEA[s]} ${d}일이고${YEAR2.includes(k)?', 1년차에는 결혼할 수 없고 2년차부터 결혼할 수 있다':n.romance?', 결혼할 수 있다':', 결혼 대상은 아니다'}.</p>`;
  const toc=`<div class="toc"><b>목차</b><ol>${secs.map(([i,t])=>`<li><a data-go="s${i}">${esc(t)}</a></li>`).join('')}</ol></div>`;
  return infobox(n)+`<h1>${esc(n.ko)} <span class="tag">SDS</span></h1>${lead}${toc}${b}`;
 }
